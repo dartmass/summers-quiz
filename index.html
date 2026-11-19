@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html{color-scheme:light}body{margin:0}[hidden]{display:none!important}*{box-sizing:border-box}</style>
+<title>さまぁ〜ずクイズ30</title>
+<meta property="og:title" content="さまぁ〜ずクイズ30">
+<meta property="og:description" content="4択で全30問。あなたは何問わかる？">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* 1画面1問。上に進みバー、中央に問題カード、下に4つのボタン */
+:root{
+  --bg:#eef4fb; --card:#ffffff; --fg:#1d2733; --muted:#5d6b7c;
+  --accent:#1f6fd1; --accent-ink:#ffffff; --line:#d5e0ee;
+  --ok:#1f9d55; --ok-bg:#e3f6ea; --ng:#d23b3b; --ng-bg:#fbe6e6;
+  --display:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN",system-ui,sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1720; --card:#18232f; --fg:#e8eef5; --muted:#9aa9ba;
+  --accent:#5aa2ff; --accent-ink:#0b1420; --line:#2a3949;
+  --ok:#4fd18b; --ok-bg:#163828; --ng:#ff7a7a; --ng-bg:#3a1c1f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1720; --card:#18232f; --fg:#e8eef5; --muted:#9aa9ba;
+  --accent:#5aa2ff; --accent-ink:#0b1420; --line:#2a3949;
+  --ok:#4fd18b; --ok-bg:#163828; --ng:#ff7a7a; --ng-bg:#3a1c1f; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6}
+.wrap{max-width:560px;margin:0 auto;padding-block:20px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:16px}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+h1{font-family:var(--display);font-weight:800;font-size:1.5rem;margin:0;letter-spacing:.02em}
+.count{font-family:var(--display);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.q{font-family:var(--display);font-weight:800;font-size:1.2rem;line-height:1.5;margin:0;text-wrap:balance}
+.choices{display:grid;gap:10px}
+.choices button{font:inherit;font-weight:700;text-align:left;padding:14px 16px;border-radius:12px;
+  border:2px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer;display:flex;gap:12px;align-items:center}
+.choices button:hover:not(:disabled){border-color:var(--accent)}
+.choices button:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.choices b{font-family:var(--display);color:var(--accent);min-width:1.2em}
+.choices button.ok{border-color:var(--ok);background:var(--ok-bg)}
+.choices button.ng{border-color:var(--ng);background:var(--ng-bg)}
+.choices button:disabled{cursor:default}
+.feedback{border-radius:12px;padding:12px 14px;font-size:.95rem}
+.feedback.ok{background:var(--ok-bg)} .feedback.ng{background:var(--ng-bg)}
+.feedback strong{font-family:var(--display);display:block;font-size:1.05rem}
+.feedback.ok strong{color:var(--ok)} .feedback.ng strong{color:var(--ng)}
+.btn{font:inherit;font-family:var(--display);font-weight:800;font-size:1.05rem;padding:14px;border-radius:12px;border:0;
+  background:var(--accent);color:var(--accent-ink);cursor:pointer;text-align:center;text-decoration:none;display:block}
+.btn.sub{background:transparent;color:var(--accent);border:2px solid var(--accent)}
+.btn.line{background:#06c755;color:#fff}
+.result{text-align:center;align-items:center}
+.score{font-family:var(--display);font-weight:800;font-size:3.4rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.score small{font-size:1.2rem;color:var(--muted);font-weight:500}
+.rank{font-family:var(--display);font-weight:800;font-size:1.25rem;color:var(--accent)}
+.result .btns{display:grid;gap:10px;width:100%}
+.note{color:var(--muted);font-size:.8rem;text-align:center;margin:0}
+@media (prefers-reduced-motion: reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>さまぁ〜ずクイズ</h1>
+    <span class="count" id="count">1 / 30</span>
+  </header>
+  <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+
+  <section class="card" id="quiz">
+    <p class="q" id="q"></p>
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="fb" hidden></div>
+    <button class="btn" id="next" hidden>次の問題へ</button>
+  </section>
+
+  <section class="card result" id="result" hidden>
+    <div>全30問中</div>
+    <div class="score"><span id="score">0</span><small> 問正解</small></div>
+    <div class="rank" id="rank"></div>
+    <div class="btns">
+      <a class="btn line" id="share" href="#" target="_blank" rel="noopener">LINEで結果を送る</a>
+      <button class="btn sub" id="again">もう一回やる</button>
+    </div>
+  </section>
+
+  <p class="note">ファンが作った非公式のクイズです</p>
+</div>
+
+<script>
+const Q=[
+ ["さまぁ〜ずの昔のコンビ名は？","バカルディ",["ネプチューン","バナナマン","くりぃむしちゅー"],"2000年までは「バカルディ」という名前でした。"],
+ ["「バカルディ」はもともと何のお酒のブランド名？","ラム酒",["日本酒","ワイン","焼酎"],"世界的に有名なラム酒のブランドです。"],
+ ["「バカルディ」というコンビ名になったきっかけは？","ネタ作りのときに着ていたTシャツ",["好きなお酒だったから","師匠につけてもらった","くじ引きで決めた"],"ネタを作っていたときに着ていた、ラム酒ブランドのTシャツが由来とされています。"],
+ ["「さまぁ〜ず」に改名したのは何年？","2000年",["1995年","2005年","2010年"],"2000年、テレビ番組の企画で改名することになりました。"],
+ ["改名のきっかけになった番組は？","新・ウンナンの気分は上々。",["めちゃ×2イケてるッ！","ダウンタウンのごっつええ感じ","笑っていいとも！"],"ウッチャンナンチャンの番組の企画で改名しました。"],
+ ["正しいコンビ名の書き方は？","さまぁ〜ず",["さまーず","サマーズ","さまぁず"],"小さい「ぁ」と波線「〜」が入ります。"],
+ ["三村さんと大竹さんは、もともとどんな関係？","高校の同級生",["お笑い養成所の同期","バイト先の先輩と後輩","いとこ同士"],"学生時代からの付き合いです。"],
+ ["大竹一樹さんの出身地は？","東京都墨田区",["大阪府大阪市","神奈川県横浜市","千葉県船橋市"],"下町・墨田区の出身です。"],
+ ["さまぁ〜ずの所属事務所は？","ホリプロコム",["吉本興業","人力舎","太田プロダクション"],"ホリプロのお笑い部門の事務所です。"],
+ ["「三村ツッコミ」で知られるのはどっち？","三村マサカズ",["大竹一樹","2人とも","どちらでもない"],"名前のとおり三村さんです。"],
+ ["三村ツッコミの定番のフレーズは？","「〜かよっ！」",["「なんでやねん！」","「ちょっと待てよ！」","「だっふんだ！」"],"「〜かよっ！」はものまねされるほどの定番です。"],
+ ["大竹一樹さんと大竹まことさんの関係は？","親せきではない（他人）",["親子","兄弟","おじと甥"],"同じ名字ですが、血のつながりはありません。"],
+ ["大竹一樹さんの奥さんは？","中村仁美さん",["大江麻理子さん","狩野恵里さん","福田典子さん"],"元アナウンサーの中村仁美さんです。"],
+ ["中村仁美さんがアナウンサーとして勤めていたテレビ局は？","フジテレビ",["テレビ東京","日本テレビ","TBS"],"フジテレビに15年勤めて、2017年にフリーになりました。"],
+ ["大竹さんと中村仁美さんが結婚したのは何年？","2011年",["2005年","2008年","2015年"],"2011年3月に入籍しました。"],
+ ["大竹さんと中村仁美さんの年の差は？","11歳",["5歳","8歳","15歳"],"11歳の年の差を越えての結婚でした。"],
+ ["2人の結婚が決まったきっかけは？","中村さんからの逆プロポーズ",["大竹さんがテレビで公開プロポーズ","番組の企画","占い師のすすめ"],"別れを切り出すつもりが「結婚してもいいと思う」と逆プロポーズになったそうです。"],
+ ["「モヤさま」の正式な番組名は？","モヤモヤさまぁ〜ず2",["モヤモヤさまぁ〜ず","モヤモヤさまぁ〜ずZ","もやもやサマーズ"],"なぜか最初から「2」がついています。"],
+ ["「モヤさま」を放送しているテレビ局は？","テレビ東京",["テレビ朝日","フジテレビ","日本テレビ"],"テレビ東京の人気番組です。"],
+ ["「モヤさま」はどんな番組？","街をぶらぶら歩いてモヤモヤを探す",["スタジオでクイズを出す","料理対決をする","スポーツで勝負する"],"ゆるい街ブラが魅力です。"],
+ ["「モヤさま」のナレーションを担当しているのは？","ショウ君（音声合成ソフト）",["ナレーターの声優","三村さん本人","アシスタントのアナウンサー"],"機械の声「ショウ君」のツッコミが名物です。"],
+ ["「モヤさま」の初代アシスタントは？","大江麻理子アナ",["狩野恵里アナ","福田典子アナ","中村仁美アナ"],"番組が始まった2007年からの初代です。"],
+ ["大江麻理子アナがアシスタントを務めたのは約何年？","約6年",["約1年","約3年","約10年"],"2007年4月から2013年4月までの約6年でした。"],
+ ["大江麻理子アナが「モヤさま」の後にキャスターになった番組は？","ワールドビジネスサテライト（WBS）",["報道ステーション","ニュースZERO","news23"],"テレビ東京の経済ニュース番組です。"],
+ ["「モヤさま」2代目アシスタントは？","狩野恵里アナ",["福田典子アナ","大江麻理子アナ","大橋未歩アナ"],"2013年から2016年まで担当しました。"],
+ ["「モヤさま」3代目アシスタントは？","福田典子アナ",["狩野恵里アナ","大江麻理子アナ","中村仁美アナ"],"2016年に抜てきされました。"],
+ ["さまぁ〜ずが司会のクイズ番組「Qさま!!」を放送している局は？","テレビ朝日",["テレビ東京","TBS","日本テレビ"],"テレビ朝日の長寿クイズ番組です。"],
+ ["2人がひたすらトークする番組「さまぁ〜ず×さまぁ〜ず」の放送局は？","テレビ朝日",["フジテレビ","テレビ東京","NHK"],"テレビ朝日の深夜のトーク番組です。"],
+ ["番組「内村さまぁ〜ず」の「内村」とは誰？","内村光良さん",["内村航平さん","内村友紀さん","内村宏幸さん"],"ウッチャンナンチャンのウッチャンです。"],
+ ["ダウンタウンと一緒にレギュラー出演していたTBSのバラエティ番組は？","リンカーン",["ガキの使いやあらへんで！","HEY!HEY!HEY!","ジャンクSPORTS"],"ダウンタウン、さまぁ〜ず、雨上がり決死隊などが出演していました。"]
+];
+const $=id=>document.getElementById(id);
+let i=0,score=0,order=[];
+function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]];}return a;}
+function show(){
+  const [q,ans,wrong]=Q[i];
+  $("count").textContent=(i+1)+" / "+Q.length;
+  $("bar").style.width=(i/Q.length*100)+"%";
+  $("q").textContent="Q"+(i+1)+". "+q;
+  $("fb").hidden=true;$("next").hidden=true;
+  const box=$("choices");box.innerHTML="";
+  order=shuffle([ans,...wrong]);
+  order.forEach((c,k)=>{
+    const b=document.createElement("button");
+    b.id="c"+k;
+    b.innerHTML="<b>"+"ABCD"[k]+"</b><span></span>";
+    b.querySelector("span").textContent=c;
+    b.onclick=()=>pick(c,b);
+    box.appendChild(b);
+  });
+}
+function pick(c,btn){
+  const [,ans,,why]=Q[i];
+  const ok=c===ans;
+  if(ok)score++;
+  [...$("choices").children].forEach(b=>{
+    b.disabled=true;
+    if(b.querySelector("span").textContent===ans)b.classList.add("ok");
+  });
+  if(!ok)btn.classList.add("ng");
+  const fb=$("fb");
+  fb.className="feedback "+(ok?"ok":"ng");
+  fb.innerHTML="<strong></strong><span></span>";
+  fb.querySelector("strong").textContent=ok?"正解！":"ざんねん… 正解は「"+ans+"」";
+  fb.querySelector("span").textContent=why;
+  fb.hidden=false;
+  $("next").textContent=i===Q.length-1?"結果を見る":"次の問題へ";
+  $("next").hidden=false;$("next").focus();
+}
+function rank(s){
+  if(s===30)return "全問正解！さまぁ〜ず博士";
+  if(s>=25)return "かなりのモヤさまマニア";
+  if(s>=18)return "立派なさまぁ〜ず好き";
+  if(s>=10)return "これからハマる人";
+  return "まずはモヤさまを観てみよう";
+}
+function finish(){
+  $("bar").style.width="100%";
+  $("quiz").hidden=true;$("result").hidden=false;
+  $("count").textContent="おわり";
+  $("score").textContent=score;
+  $("rank").textContent=rank(score);
+  const text="さまぁ〜ずクイズ、30問中"+score+"問正解でした！（"+rank(score)+"）";
+  $("share").href="https://line.me/R/msg/text/?"+encodeURIComponent(text);
+}
+$("next").onclick=()=>{i++; if(i<Q.length)show(); else finish();};
+$("again").onclick=()=>{i=0;score=0;$("result").hidden=true;$("quiz").hidden=false;show();};
+show();
+</script>
+</body>
+</html>
