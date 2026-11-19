@@ -176,7 +176,7 @@ function finish(){
   $("count").textContent="おわり";
   $("score").textContent=score;
   $("rank").textContent=rank(score);
-  const text="さまぁ〜ずクイズ、30問中"+score+"問正解でした！（"+rank(score)+"）";
+  const text="さまぁ〜ずクイズ、30問中"+score+"問正解でした！（"+rank(score)+"）\nあなたは何問わかる？ https://dartmass.github.io/summers-quiz/";
   $("share").href="https://line.me/R/msg/text/?"+encodeURIComponent(text);
 }
 $("next").onclick=()=>{i++; if(i<Q.length)show(); else finish();};
